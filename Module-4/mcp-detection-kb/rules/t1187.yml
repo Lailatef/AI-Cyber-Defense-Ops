@@ -1,0 +1,59 @@
+title: Outbound SMB Connection or Remote RPC Coercion Call (Potential Forced Authentication)
+id: 0b54ac10-1934-435c-a5c3-4b66759b3b16
+status: test
+description: >
+  Detects two independent telemetry signals for T1187 coercion techniques
+  (e.g. PetitPotam, PrinterBug, ShadowCoerce) that force a host to
+  authenticate to attacker-controlled infrastructure so its NTLM material
+  can be captured or relayed: (1) the coerced victim's outbound SMB/NetBIOS
+  connection (Sysmon EventID 3) to a non-RFC1918 destination, and (2) the
+  attacker's remote call (NetworkAddress populated, not a local LRPC call)
+  to a known coercion-abusable RPC interface, captured via the
+  Microsoft-Windows-RPC/Debug ETW provider (EventID 5, "RPC call started").
+  The two selections cover different points in the attack chain and different
+  hosts/log sources - either one firing independently indicates the technique.
+  Interface UUIDs in selection_rpc_coercion are widely cited in public
+  PetitPotam/PrinterBug/ShadowCoerce research; verify against current
+  published values before relying on them in production.
+references:
+  - https://attack.mitre.org/techniques/T1187/
+  - https://github.com/topotam/PetitPotam
+  - https://github.com/p0dalirius/Coercer
+author: Detection Engineering Team
+date: 2026/07/14
+tags:
+  - attack.credential-access
+  - attack.t1187
+logsource:
+  product: windows
+detection:
+  selection_smb_coercion:
+    Channel: 'Microsoft-Windows-Sysmon/Operational'
+    EventID: 3
+    Initiated: 'true'
+    DestinationPort:
+      - 445
+      - 139
+  filter_private_dest:
+    DestinationIp|cidr:
+      - '10.0.0.0/8'
+      - '172.16.0.0/12'
+      - '192.168.0.0/16'
+      - '127.0.0.0/8'
+  selection_rpc_coercion:
+    Provider_Name: 'Microsoft-Windows-RPC'
+    EventID: 5
+    InterfaceUuid:
+      - '{c681d488-d850-11d0-8c52-00c04fd90f7e}'  # MS-EFSR (PetitPotam)
+      - '{df1941c5-fe89-4e79-bf10-463657acf44d}'  # MS-EFSR alternate (PetitPotam)
+      - '{12345678-1234-abcd-ef00-0123456789ab}'  # MS-RPRN (PrinterBug/SpoolSample)
+      - '{a8e0653c-2744-4389-a61d-7373df8b2292}'  # MS-FSRVP (ShadowCoerce)
+  filter_local_rpc:
+    NetworkAddress: 'NULL'
+  condition: (selection_smb_coercion and not filter_private_dest) or (selection_rpc_coercion and not filter_local_rpc)
+falsepositives:
+  - Legitimate access to external SMB file shares over VPN or site-to-site links
+  - Cloud-hosted SMB file services (e.g. Azure Files) reachable over the internet
+  - Legitimate remote administration or backup tooling that calls EFSRPC/MS-RPRN/MS-FSRVP over the network
+  - Microsoft-Windows-RPC/Debug is not collected by default; this selection only fires where that ETW channel is explicitly enabled
+level: medium

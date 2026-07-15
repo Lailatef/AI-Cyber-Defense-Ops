@@ -1,0 +1,15 @@
+# MCP server framework
+mcp
+
+# Hayabusa's detection rules are Sigma-format YAML (multi-line descriptions,
+# lists, and even multi-document files for correlation rules) — needed to
+# read rule metadata for get_hayabusa_rules.
+PyYAML
+
+# Hayabusa itself is an external CLI binary (not a pip package) — install
+# separately from https://github.com/Yamato-Security/hayabusa and ensure
+# it's on PATH or configured via environment variable.
+#
+# Running Hayabusa (subprocess) and parsing its JSON/JSONL output only
+# require the Python standard library (subprocess, json), so no extra
+# runtime dependencies are needed for those steps.

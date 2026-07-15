@@ -1,0 +1,41 @@
+title: Forced Authentication (Coercion) Response Playbook
+id: 4c9d5f6b-7e8a-4d4c-8f6b-9a7c8d9e1f2b
+severity: medium
+techniques:
+  - T1187
+alert_names:
+  - t1187
+  - Outbound SMB Connection or Remote RPC Coercion Call (Potential Forced Authentication)
+summary: >
+  Response procedure for suspected coercion-based forced authentication
+  (PetitPotam, PrinterBug, ShadowCoerce) where a host is tricked into
+  authenticating to attacker infrastructure so its NTLM material can be
+  captured or relayed.
+steps:
+  - phase: Identification
+    actions:
+      - Determine which selection fired — victim-side outbound SMB (Sysmon EventID 3) or attacker-side RPC coercion call (Microsoft-Windows-RPC/Debug EventID 5) — via scan_evtx output_format="full", since they identify different hosts in the attack chain.
+      - For the RPC coercion selection, note the InterfaceUuid to identify which coercion technique was attempted (MS-EFSR/PetitPotam, MS-RPRN/PrinterBug, MS-FSRVP/ShadowCoerce).
+      - For the SMB selection, confirm the destination is genuinely attacker-controlled infrastructure and not a legitimate external file share or cloud SMB endpoint (see the rule's falsepositives).
+      - Check whether the coerced host has an NTLM relay-worthy role (domain controller, CA server, high-privilege service account) — this determines urgency.
+  - phase: Containment
+    actions:
+      - Block outbound SMB (445/139) from the coerced host to the attacker-controlled destination at the firewall/host level.
+      - If an attacker-controlled relay listener is identified, isolate that host from the network.
+      - If the coerced host is a domain controller or certificate authority, treat as high urgency — successful relay against these can lead to full domain compromise (e.g. via AD CS).
+  - phase: Eradication
+    actions:
+      - Remove/patch the coercion vector where applicable (e.g. disable the Print Spooler service on servers that don't need it, to close PrinterBug/SpoolSample).
+      - Identify and remove the attacker's foothold that issued the coercion call in the first place.
+  - phase: Recovery
+    actions:
+      - Enforce SMB signing and disable NTLM where feasible (especially toward domain controllers and CAs) to remove the relay's value even if coercion recurs.
+      - Verify EFS, Spooler, and FSRVP services are disabled on hosts that don't require them.
+  - phase: Lessons Learned
+    actions:
+      - Confirm whether the Microsoft-Windows-RPC/Debug ETW channel is enabled fleet-wide — the RPC coercion selection only fires where it's explicitly collected (see rule falsepositives).
+      - Re-verify the InterfaceUuid list in rules/t1187.yml against current published PetitPotam/PrinterBug/ShadowCoerce research periodically.
+references:
+  - https://attack.mitre.org/techniques/T1187/
+  - https://github.com/topotam/PetitPotam
+  - https://github.com/p0dalirius/Coercer

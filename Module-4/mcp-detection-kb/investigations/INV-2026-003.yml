@@ -1,0 +1,49 @@
+case_id: INV-2026-003
+title: PetitPotam-Style Coercion Attempt Targeting CA01
+date: 2026/05/19
+status: closed
+disposition: true_positive
+severity: high
+techniques:
+  - T1187
+hosts_involved:
+  - DC02
+  - CA01
+  - ATTACKER-VM (external)
+triggering_alert: t1187
+playbook_used: forced-authentication
+summary: >
+  The t1187 curated rule fired on both of its independent selections: (1)
+  DC02's outbound SMB connection (Sysmon Event ID 3) to a non-RFC1918
+  destination, and (2) a Microsoft-Windows-RPC/Debug Event ID 5 RPC call
+  against the MS-EFSR interface UUID with NetworkAddress populated —
+  consistent with a PetitPotam-style coercion attempting to force DC02 to
+  authenticate to attacker infrastructure so the NTLM material could be
+  relayed to CA01's web enrollment endpoint (see environment/hosts.yml,
+  CA01 notes).
+timeline:
+  - time: "2026-05-19T14:01:00Z"
+    event: Attacker, having gained a foothold via a separate initial-access incident, calls the EFSRPC EfsRpcOpenFileRaw method against DC02 from an external host.
+  - time: "2026-05-19T14:01:02Z"
+    event: t1187 selection_rpc_coercion fires (Microsoft-Windows-RPC/Debug EventID 5, MS-EFSR interface, remote NetworkAddress).
+  - time: "2026-05-19T14:01:05Z"
+    event: DC02 attempts outbound SMB authentication to the attacker's relay listener; t1187 selection_smb_coercion fires independently (Sysmon EventID 3, non-RFC1918 destination).
+  - time: "2026-05-19T14:03:00Z"
+    event: On-call analyst correlates both selections to the same DC02 host/timeframe, opens the forced-authentication playbook, and blocks outbound 445/139 from DC02 to the attacker IP at the perimeter firewall.
+  - time: "2026-05-19T14:10:00Z"
+    event: No evidence found that the relay reached CA01's enrollment endpoint before containment — attempt assessed as blocked in progress.
+root_cause: >
+  EFS RPC interface was reachable from DC02 without the MS-EFSR hardening
+  mitigations applied; no NTLM signing/EPA enforced toward CA01's web
+  enrollment endpoint at the time.
+remediation:
+  - Blocked the attacker's external IP at the perimeter.
+  - Enabled Extended Protection for Authentication (EPA) and required HTTPS + signing on CA01's web enrollment endpoint, closing the relay path even if coercion recurs.
+  - Restricted inbound EFSRPC on domain controllers to only hosts with a legitimate need.
+  - Confirmed Print Spooler remained disabled on DC01/DC02 (see environment/services.yml) to avoid a second coercion vector.
+analyst: J. Rivera
+references:
+  - detection://rules/t1187
+  - detection://playbooks/forced-authentication
+  - detection://environment/hosts
+  - detection://environment/services

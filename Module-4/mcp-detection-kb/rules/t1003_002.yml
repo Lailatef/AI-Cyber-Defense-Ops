@@ -1,0 +1,32 @@
+title: Potential SAM Database Dumping via reg.exe save
+id: 42f62e1e-e42d-4e37-8179-134492b31dda
+status: experimental
+description: >
+  Detects use of reg.exe (or equivalent) to save the SAM, SECURITY, or SYSTEM
+  registry hives to disk, a common precursor to offline extraction of local
+  account credential material (e.g. via secretsdump.py, pwdump, or Mimikatz
+  lsadump::sam).
+references:
+  - https://attack.mitre.org/techniques/T1003/002/
+author: Detection Engineering Team
+date: 2026/07/14
+tags:
+  - attack.credential-access
+  - attack.t1003.002
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: '\reg.exe'
+  selection_cmd:
+    CommandLine|contains: 'save'
+  selection_hive:
+    CommandLine|contains:
+      - 'HKLM\SAM'
+      - 'HKLM\SECURITY'
+      - 'HKLM\SYSTEM'
+  condition: selection_img and selection_cmd and selection_hive
+falsepositives:
+  - Legitimate registry backup/administration scripts
+level: high

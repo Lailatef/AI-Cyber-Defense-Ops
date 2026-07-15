@@ -1,0 +1,38 @@
+case_id: INV-2026-004
+title: Failed-Logon Spike Against WEB01 VPN Gateway
+date: 2026/06/08
+status: closed
+disposition: false_positive
+severity: low
+techniques:
+  - T1110
+hosts_involved:
+  - WEB01
+triggering_alert: brute_force
+playbook_used: brute-force
+summary: >
+  The brute_force curated rule fired on a spike of 4625 events against
+  WEB01's VPN/remote-access endpoint. Investigation confirmed this matched
+  the known_noisy_sources baseline for WEB01 in environment/baselines.yml
+  (failed_logon_thresholds) — internet background scanning, not a targeted
+  campaign. No successful logons (4624) followed any of the failed
+  attempts, and no single account received more than 3 attempts.
+timeline:
+  - time: "2026-06-08T03:00:00Z"
+    event: brute_force rule fires on WEB01 for a 45-minute window of failed logons spread across ~30 distinct usernames, ~2 attempts each.
+  - time: "2026-06-08T08:15:00Z"
+    event: Analyst reviews the source IPs — consistent with known internet-wide credential-scanning ranges, not a single focused attacker.
+  - time: "2026-06-08T08:20:00Z"
+    event: Cross-checked against environment/baselines.yml; volume and pattern consistent with WEB01's documented background noise. Confirmed no 4624 success followed any attempt. Closed as false positive.
+root_cause: >
+  Expected internet-facing background noise; not a security incident. Rule
+  behaved correctly — the pattern is exactly what environment/baselines.yml
+  documents as expected for this host.
+remediation:
+  - No remediation required. Confirmed the current failed_logon_thresholds baseline for WEB01 in environment/baselines.yml still reflects reality; no update needed.
+  - Recommended (not yet implemented): enable rate-limiting/CAPTCHA on the VPN gateway's public login page to reduce this recurring noise.
+analyst: T. Okafor
+references:
+  - detection://rules/brute_force
+  - detection://playbooks/brute-force
+  - detection://environment/baselines

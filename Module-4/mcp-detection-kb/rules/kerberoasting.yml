@@ -1,0 +1,29 @@
+title: Potential Kerberoasting Activity via Abnormal TGS Requests
+id: 3c9e7a1b-6d2f-4a8c-b5e3-9f1a2b3c4d5e
+status: stable
+description: >
+  Detects a high volume of Kerberos Service Ticket (TGS) requests using RC4
+  encryption from a single source, consistent with a Kerberoasting attack
+  where an adversary requests tickets for many SPNs to crack offline.
+references:
+  - https://attack.mitre.org/techniques/T1558/003/
+author: Detection Engineering Team
+date: 2026/07/13
+tags:
+  - attack.credential-access
+  - attack.t1558.003
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4769
+    TicketEncryptionType: '0x17'
+  filter_machine_accounts:
+    ServiceName|endswith: '$'
+  timeframe: 5m
+  condition: selection and not filter_machine_accounts | count(ServiceName) by IpAddress > 10
+falsepositives:
+  - Legitimate bulk service ticket renewal by monitoring/backup tools
+  - Environments with many legacy RC4-only services
+level: high

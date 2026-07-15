@@ -1,0 +1,52 @@
+# Critical services in the environment, their normal footprint, and the
+# curated rules/playbooks they're relevant to. Cross-reference with
+# environment/hosts.yml for host criticality.
+services:
+  - name: Active Directory Domain Services
+    hosts: [DC01, DC02]
+    criticality: critical
+    normal_ports: [389, 636, 3268, 3269, 88, 135, 445]
+    related_rules: [dcsync, ntds_dit_access, kerberoasting, t1558_004]
+    notes: >
+      Core directory service. Any related_rules finding against DC01/DC02
+      warrants immediate triage per the credential-theft or
+      kerberos-ticket-attacks playbook.
+  - name: Active Directory Certificate Services (ADCS)
+    hosts: [CA01]
+    criticality: critical
+    normal_ports: [443, 135]
+    related_rules: [t1187]
+    notes: >
+      Web enrollment endpoint is a common NTLM relay target following
+      T1187 coercion; treat any coercion alert naming CA01 as the
+      destination as high urgency (see forced-authentication playbook).
+  - name: Print Spooler
+    hosts: [DC01, DC02, FS01]
+    criticality: low
+    normal_ports: []
+    related_rules: [t1187]
+    notes: >
+      Should be disabled on DC01/DC02 per hardening baseline (closes the
+      PrinterBug/SpoolSample coercion vector). If enabled there, its
+      presence is itself a finding independent of any alert firing.
+  - name: File Sharing (SMB)
+    hosts: [FS01]
+    criticality: high
+    normal_ports: [445, 139]
+    related_rules: [t1187, lsass_memory_access]
+    notes: >
+      Legitimate outbound SMB from internal hosts should stay within
+      RFC1918 space or the approved Azure Files endpoint — see
+      environment/baselines.yml.
+  - name: VPN / Remote Access Gateway
+    hosts: [WEB01]
+    criticality: high
+    normal_ports: [443]
+    related_rules: [brute_force]
+    notes: Internet-facing authentication endpoint; primary expected source of brute-force/spray alerts.
+  - name: LSA / Local Authentication
+    hosts: ["WKS-*", FS01, DC01, DC02]
+    criticality: critical
+    normal_ports: []
+    related_rules: [lsass_memory_access, t1556, t1003_002, t1003_002_registry_access]
+    notes: Present on every Windows host; alerts here inherit the criticality of the host they're on (see environment/hosts.yml).

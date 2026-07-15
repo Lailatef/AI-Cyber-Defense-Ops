@@ -1,0 +1,34 @@
+title: Suspicious Process Access to LSASS Memory
+id: 8a1f5e2c-4b3d-4c7a-9e1f-2d3c4b5a6f7e
+status: stable
+description: >
+  Detects processes requesting suspicious access rights to lsass.exe, a common
+  precursor to credential dumping (e.g. Mimikatz-style attacks reading
+  authentication secrets from process memory).
+references:
+  - https://attack.mitre.org/techniques/T1003/001/
+author: Detection Engineering Team
+date: 2026/07/13
+tags:
+  - attack.credential-access
+  - attack.t1003.001
+logsource:
+  category: process_access
+  product: windows
+detection:
+  selection:
+    TargetImage|endswith: '\lsass.exe'
+    GrantedAccess:
+      - '0x1010'
+      - '0x1410'
+      - '0x1438'
+      - '0x143a'
+      - '0x1fffff'
+  filter_known_tools:
+    SourceImage|endswith:
+      - '\MsMpEng.exe'
+      - '\WmiPrvSE.exe'
+  condition: selection and not filter_known_tools
+falsepositives:
+  - Legitimate security/monitoring tools with LSASS access exclusions not covered above
+level: high

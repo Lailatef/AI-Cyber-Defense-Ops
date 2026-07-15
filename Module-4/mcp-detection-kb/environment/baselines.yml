@@ -1,0 +1,59 @@
+# Normal-behavior baselines used to separate expected activity from
+# anomalies when triaging curated-rule findings. Update this file when
+# the environment's legitimate footprint changes — stale baselines cause
+# false negatives (a new legitimate source gets treated as suspicious)
+# or worse, get copy-pasted into an allowlist and become a blind spot.
+baselines:
+  - name: dcsync_replication_accounts
+    applies_to_rule: dcsync
+    description: >
+      The only accounts expected to issue DS-Replication-Get-Changes /
+      DS-Replication-Get-Changes-All requests (Event ID 4662) are the
+      DC01$/DC02$ machine accounts and the BACKUP-SVC service account
+      (Azure AD Connect / backup software). Any other account triggering
+      this is a true positive by default.
+    expected_sources:
+      - DC01$
+      - DC02$
+      - BACKUP-SVC
+  - name: outbound_smb_destinations
+    applies_to_rule: t1187
+    description: >
+      Legitimate outbound SMB from internal hosts stays within RFC1918
+      space, except the approved Azure Files endpoint. Any other
+      external SMB destination is unexpected.
+    expected_destinations:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - files.company.core.windows.net (Azure Files)
+  - name: kerberos_tgs_request_volume
+    applies_to_rule: kerberoasting
+    description: >
+      Normal TGS request volume per user account is under 10/hour.
+      Service/monitoring accounts that legitimately enumerate SPNs
+      (e.g. vulnerability scanners) should be added here explicitly as
+      they're onboarded, or the rule will alert on them every scan.
+    expected_high_volume_accounts: []
+  - name: failed_logon_thresholds
+    applies_to_rule: brute_force
+    description: >
+      Baseline failed-logon rate is under 5/account/hour from any single
+      source. WEB01's VPN gateway sees elevated background noise
+      (~20/hour) from internet scanning; this is priced into triage
+      expectations for that host but should be re-tuned if attacker
+      behavior adapts to stay under threshold.
+    known_noisy_sources:
+      - WEB01
+  - name: lsass_access_processes
+    applies_to_rule: lsass_memory_access
+    description: >
+      Expected processes with legitimate handles to lsass.exe: the
+      Defender/EDR agent, Task Manager/Process Explorer when run
+      interactively by IT staff, and the backup agent on DC01/DC02. Any
+      other process requesting PROCESS_VM_READ or similar suspicious
+      access rights is a true positive by default.
+    expected_processes:
+      - MsMpEng.exe
+      - taskmgr.exe
+      - procexp64.exe

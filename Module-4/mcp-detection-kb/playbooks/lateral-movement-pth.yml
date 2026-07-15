@@ -1,0 +1,38 @@
+title: Pass-the-Hash Lateral Movement Response Playbook
+id: 3b8c4e5a-6d7f-4c3b-9e5a-8f6b7c8d9e1a
+severity: high
+techniques:
+  - T1550.002
+alert_names:
+  - pass_the_hash
+  - Potential Pass-the-Hash Activity via NTLM Logon Anomaly
+summary: >
+  Response procedure for suspected Pass-the-Hash lateral movement:
+  NTLM network logons (Type 3) reusing a captured password hash
+  without knowledge of the plaintext password.
+steps:
+  - phase: Identification
+    actions:
+      - Pull the full 4624 event via scan_evtx output_format="full" to get the target host, source host/IP, and account used.
+      - Confirm the logon is NTLM (not Kerberos) and Type 3 (network), and check whether the source host is one the account normally authenticates from.
+      - Trace the account's authentication history across hosts in the same window to map the extent of lateral movement (multiple hosts hit in quick succession is a strong signal).
+  - phase: Containment
+    actions:
+      - Isolate the source host — it is the one holding the captured hash and driving the lateral movement.
+      - Disable the compromised account or force sign-out of all active sessions if business impact allows.
+      - Block the source host's access to other high-value hosts (domain controllers, file servers) at the network layer if isolation isn't immediately possible.
+  - phase: Eradication
+    actions:
+      - Reset the compromised account's password (this invalidates the stolen hash for NTLM reuse going forward).
+      - Identify and remove the credential-dumping tooling on the originating host that produced the hash (see the Credential Theft Response Playbook).
+      - Audit local Administrator account reuse across hosts — Pass-the-Hash is most effective when the same local admin hash is valid on many machines.
+  - phase: Recovery
+    actions:
+      - Re-enable the account only after the source host is confirmed clean.
+      - Verify no additional hosts were reached using the same hash before declaring the incident closed.
+  - phase: Lessons Learned
+    actions:
+      - Recommend randomized local Administrator passwords (e.g. LAPS) if reuse across hosts enabled lateral spread.
+      - Consider restricting NTLM in favor of Kerberos where feasible, and enabling Credential Guard on high-value endpoints.
+references:
+  - https://attack.mitre.org/techniques/T1550/002/
