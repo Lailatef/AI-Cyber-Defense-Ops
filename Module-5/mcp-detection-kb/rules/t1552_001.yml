@@ -1,0 +1,45 @@
+title: Access to Common Unsecured Credential File Locations
+id: 961a80a6-f93e-475f-9c48-feb9c3f9f81f
+status: test
+description: >
+  Detects file access to well-known locations where credentials are
+  frequently stored in plaintext or reversible form (SSH private keys,
+  cloud CLI credential files, CI/CD and package-manager config files,
+  unattended-install answer files, GPP Groups.xml, IIS web.config
+  connection strings), consistent with an adversary harvesting
+  unsecured credentials from the filesystem.
+references:
+  - https://attack.mitre.org/techniques/T1552/001/
+author: Detection Engineering Team
+date: 2026/07/14
+tags:
+  - attack.credential-access
+  - attack.t1552.001
+logsource:
+  product: windows
+  category: file_event
+detection:
+  selection:
+    TargetFilename|contains:
+      - '\.aws\credentials'
+      - '\.azure\credentials'
+      - '\.ssh\id_rsa'
+      - '\.ssh\id_ed25519'
+      - '\.npmrc'
+      - '\.docker\config.json'
+      - 'unattend.xml'
+      - 'sysprep.inf'
+      - 'web.config'
+      - 'Groups.xml'
+  filter_dev_tools:
+    Image|endswith:
+      - '\ssh.exe'
+      - '\ssh-agent.exe'
+      - '\Code.exe'
+      - '\devenv.exe'
+  condition: selection and not filter_dev_tools
+falsepositives:
+  - Developers legitimately opening SSH keys or config files in an editor/IDE
+  - Deployment or provisioning tooling reading unattend.xml/web.config during setup
+  - Group Policy processing legitimately reading Groups.xml from SYSVOL
+level: medium

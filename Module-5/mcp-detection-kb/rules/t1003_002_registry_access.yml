@@ -1,0 +1,36 @@
+title: SAM/SECURITY Registry Hive Access via Object Auditing
+id: 6f1d8b3a-9c2e-4a7f-b5d1-3e8f0c6a2d4b
+status: experimental
+description: >
+  Detects direct access to the SAM or SECURITY registry hives via Windows
+  object access auditing (Event ID 4663), a credential-dumping precursor
+  that bypasses reg.exe (e.g. direct registry API calls, Mimikatz
+  lsadump::sam). Requires a SACL configured on the target hives to
+  generate audit events. Companion to t1003_002.yml, which covers the
+  reg.exe save angle of the same technique.
+references:
+  - https://attack.mitre.org/techniques/T1003/002/
+author: Detection Engineering Team
+date: 2026/07/14
+tags:
+  - attack.credential-access
+  - attack.t1003.002
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4663
+    ObjectType: 'Key'
+    ObjectName|contains:
+      - '\SAM'
+      - '\SECURITY'
+  filter_known_tools:
+    ProcessName|endswith:
+      - '\lsass.exe'
+      - '\svchost.exe'
+  condition: selection and not filter_known_tools
+falsepositives:
+  - Legitimate system processes reading these hives during normal boot/service startup
+  - Backup or registry auditing tools with legitimate access to these hives
+level: high

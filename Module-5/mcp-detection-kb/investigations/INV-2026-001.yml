@@ -1,0 +1,46 @@
+case_id: INV-2026-001
+title: DCSync Attempt from Compromised Workstation WKS-042
+date: 2026/03/14
+status: closed
+disposition: true_positive
+severity: critical
+techniques:
+  - T1003.006
+hosts_involved:
+  - WKS-042
+  - DC01
+triggering_alert: dcsync
+playbook_used: credential-theft
+summary: >
+  The dcsync curated rule fired on DC01 for a DS-Replication-Get-Changes-All
+  request (Event ID 4662) issued by the account WKS-042$ — a workstation
+  machine account, not DC01$/DC02$/BACKUP-SVC per environment/baselines.yml
+  (dcsync_replication_accounts). This was an immediate true positive by
+  definition of the baseline.
+timeline:
+  - time: "2026-03-14T09:02:00Z"
+    event: Phishing email delivers a macro-enabled document to a user on WKS-042.
+  - time: "2026-03-14T09:07:00Z"
+    event: Malicious macro drops a credential-dumping tool; local admin token obtained via a separate privilege escalation exploit.
+  - time: "2026-03-14T09:11:00Z"
+    event: Attacker grants WKS-042$ the Replicating Directory Changes All extended right on the domain object (out-of-band, not itself alerted on).
+  - time: "2026-03-14T09:12:00Z"
+    event: WKS-042$ issues a DS-Replication-Get-Changes-All request against DC01 — dcsync rule fires (4662).
+  - time: "2026-03-14T09:14:00Z"
+    event: SOC analyst triages the alert, confirms WKS-042 is not a domain controller, and begins the credential-theft playbook.
+  - time: "2026-03-14T09:20:00Z"
+    event: WKS-042 isolated from the network; krbtgt and all domain admin accounts scheduled for password rotation.
+root_cause: >
+  Phishing led to workstation compromise, followed by a misconfigured/abused
+  delegation that granted a workstation machine account directory
+  replication rights it should never have held.
+remediation:
+  - Rotated krbtgt (twice, per Microsoft guidance) and all privileged account passwords.
+  - Removed the Replicating Directory Changes All right from WKS-042$.
+  - Added a recurring audit of accounts holding DCSync-capable extended rights, to catch future out-of-band grants before they're abused.
+  - Re-imaged WKS-042.
+analyst: J. Rivera
+references:
+  - detection://rules/dcsync
+  - detection://playbooks/credential-theft
+  - detection://environment/baselines

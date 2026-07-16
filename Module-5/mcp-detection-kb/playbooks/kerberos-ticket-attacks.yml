@@ -1,0 +1,41 @@
+title: Kerberos Ticket Attack Response Playbook
+id: 2a9b3d4f-7c5e-4b2a-8d3f-6e4a5b6c7d8e
+severity: medium
+techniques:
+  - T1558.003
+  - T1558.004
+alert_names:
+  - kerberoasting
+  - Potential Kerberoasting Activity via Abnormal TGS Requests
+  - t1558_004
+  - Potential AS-REP Roasting Activity
+summary: >
+  Response procedure for suspected offline Kerberos ticket-cracking
+  activity: Kerberoasting (bulk RC4 TGS requests) or AS-REP Roasting
+  (AS-REQ against accounts with pre-authentication disabled).
+steps:
+  - phase: Identification
+    actions:
+      - Pull the full 4769 (Kerberoasting) or 4768 (AS-REP Roasting) event via scan_evtx output_format="full" to get the requesting account, source host, and target SPN(s)/account.
+      - Check request volume and SPN diversity from the source account/host in the surrounding window — a single legitimate request is not evidence of an attack, a burst against many SPNs is.
+      - For AS-REP Roasting, confirm whether the targeted account legitimately has "Do not require Kerberos preauthentication" set, or whether that setting itself is unexpected.
+  - phase: Containment
+    actions:
+      - If the requesting account is a user account (not a service account with a legitimate reason to enumerate SPNs), disable it pending investigation.
+      - Flag the targeted service account(s)/user account(s) for expedited password rotation.
+  - phase: Eradication
+    actions:
+      - Rotate the password of every targeted service account to a long, random value (Kerberoasting only cracks weak/short service account passwords offline).
+      - Remove "Do not require Kerberos preauthentication" from any account where it isn't operationally required.
+      - Remove any enumeration/attack tooling (e.g. Rubeus, GetUserSPNs.py output) found on the source host.
+  - phase: Recovery
+    actions:
+      - Re-enable the source account only after confirming the activity was authorized tooling or after remediating a compromised host.
+      - Re-verify service account passwords meet length/complexity requirements (25+ characters or managed service account) to prevent recurrence.
+  - phase: Lessons Learned
+    actions:
+      - Consider migrating high-value service accounts to Group Managed Service Accounts (gMSA), which are not subject to offline cracking in the same way.
+      - Update this playbook's alert_names if a new Sigma/Hayabusa rule title starts covering this technique.
+references:
+  - https://attack.mitre.org/techniques/T1558/003/
+  - https://attack.mitre.org/techniques/T1558/004/

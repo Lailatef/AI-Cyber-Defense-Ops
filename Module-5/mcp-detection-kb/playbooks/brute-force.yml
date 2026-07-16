@@ -1,0 +1,37 @@
+title: Brute Force / Password Spraying Response Playbook
+id: 5d1e6a7c-8f9b-4e5d-9a7c-1b8d9e1f2a3c
+severity: medium
+techniques:
+  - T1110
+alert_names:
+  - brute_force
+  - Potential Brute Force or Password Spraying via Failed Logons
+summary: >
+  Response procedure for a high volume of failed logon attempts (4625)
+  against a single account or from a single source, consistent with
+  brute-force or password-spraying activity.
+steps:
+  - phase: Identification
+    actions:
+      - Pull the full 4625 events via scan_evtx output_format="full" and determine the pattern — many passwords against one account (brute force) vs. one/few passwords against many accounts (spraying).
+      - Identify the source: internal host (likely compromised) or external IP (internet-facing service, e.g. RDP/VPN/webmail).
+      - Check whether any of the targeted accounts show a subsequent successful logon (4624) immediately after the failures — that indicates the attack succeeded.
+  - phase: Containment
+    actions:
+      - Lock or disable the targeted account(s) if a successful logon is suspected following the failures.
+      - Block the source IP/host at the firewall or identity provider if external.
+      - If the source is an internal host, isolate it pending investigation — it may itself be compromised and running the attack.
+  - phase: Eradication
+    actions:
+      - Force a password reset for any account with a suspected successful compromise.
+      - Remove any attack tooling found on an internal source host.
+  - phase: Recovery
+    actions:
+      - Re-enable accounts only after password reset and MFA re-enrollment if applicable.
+      - Confirm account lockout/rate-limiting policy is functioning as expected on the targeted service.
+  - phase: Lessons Learned
+    actions:
+      - If the target was an internet-facing service, evaluate whether it should require MFA or be placed behind a VPN.
+      - Consider whether account lockout thresholds are tuned appropriately to catch spraying without causing excessive self-inflicted lockouts.
+references:
+  - https://attack.mitre.org/techniques/T1110/

@@ -1,0 +1,30 @@
+title: Potential AS-REP Roasting Activity
+id: 4fead7ec-cf9c-4f36-9d1f-ea4f07c18221
+status: experimental
+description: >
+  Detects Kerberos AS-REQ/AS-REP activity (Event ID 4768) with no
+  pre-authentication (PreAuthType 0) and RC4 ticket encryption, consistent
+  with AS-REP Roasting against accounts that have "Do not require Kerberos
+  preauthentication" enabled, so the AS-REP can be cracked offline.
+references:
+  - https://attack.mitre.org/techniques/T1558/004/
+author: Detection Engineering Team
+date: 2026/07/14
+tags:
+  - attack.credential-access
+  - attack.t1558.004
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4768
+    PreAuthType: '0'
+    TicketEncryptionType: '0x17'
+  filter_machine_accounts:
+    TargetUserName|endswith: '$'
+  condition: selection and not filter_machine_accounts
+falsepositives:
+  - Accounts intentionally configured with "Do not require Kerberos preauthentication" for legacy compatibility
+  - Legitimate authentication from clients/services that don't support pre-authentication
+level: high

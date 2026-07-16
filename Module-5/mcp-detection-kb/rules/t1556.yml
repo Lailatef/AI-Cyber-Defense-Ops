@@ -1,0 +1,34 @@
+title: LSA Authentication Package or Security Support Provider Registered
+id: 75c05bf5-183a-48f8-8c00-a7ffb653eeb7
+status: test
+description: >
+  Detects a registry value modification to the LSA's Authentication
+  Packages, Notification Packages, or Security Packages keys. These
+  keys control which DLLs LSASS loads to handle authentication;
+  adversaries add a malicious authentication package/SSP (e.g. a
+  Skeleton Key or password filter DLL) here to capture plaintext
+  credentials or bypass normal authentication.
+references:
+  - https://attack.mitre.org/techniques/T1556/
+  - https://attack.mitre.org/techniques/T1556/002/
+author: Detection Engineering Team
+date: 2026/07/14
+tags:
+  - attack.credential-access
+  - attack.t1556
+logsource:
+  product: windows
+  category: registry_set
+detection:
+  selection:
+    EventID: 13
+    TargetObject|contains:
+      - '\Control\Lsa\Authentication Packages'
+      - '\Control\Lsa\Notification Packages'
+      - '\Control\Lsa\Security Packages'
+      - '\Control\Lsa\OSConfig\Security Packages'
+  condition: selection
+falsepositives:
+  - Legitimate installation of third-party security/SSO software that registers an authentication package (e.g. smart card middleware, PAM/RADIUS integrations)
+  - Group Policy or endpoint management deploying an approved LSA provider
+level: high

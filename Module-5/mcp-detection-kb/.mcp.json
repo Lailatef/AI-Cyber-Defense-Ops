@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "hayabusa": {
+      "command": "py",
+      "args": ["server.py"]
+    }
+  }
+}

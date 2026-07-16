@@ -1,0 +1,29 @@
+title: Potential Brute Force or Password Spraying via Failed Logons
+id: 9d3f2b1a-4e6c-4a8f-b1d3-6e2a5c8f1b90
+status: test
+description: >
+  Detects a high volume of failed logon attempts (Event ID 4625) against a
+  single account or originating from a single source within a short window,
+  consistent with brute-force or password-spraying attacks.
+references:
+  - https://attack.mitre.org/techniques/T1110/
+author: Detection Engineering Team
+date: 2026/07/13
+tags:
+  - attack.credential-access
+  - attack.t1110
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+  filter_service_accounts:
+    TargetUserName|endswith: '$'
+  timeframe: 5m
+  condition: selection and not filter_service_accounts | count(TargetUserName) by IpAddress > 10 or count(IpAddress) by TargetUserName > 10
+falsepositives:
+  - Users mistyping their password repeatedly, especially with cached/mapped drive connections retrying an old credential
+  - NAT/VPN gateways or proxies that aggregate many legitimate users behind a single source IP
+  - Misconfigured services or scheduled tasks retrying stale credentials
+level: high

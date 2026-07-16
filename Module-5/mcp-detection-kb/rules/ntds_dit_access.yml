@@ -1,0 +1,31 @@
+title: NTDS.dit Access via Volume Shadow Copy or ntdsutil
+id: 2b6c8e1a-4d3f-4b5c-9a1e-6f7a8b9c1d2e
+status: stable
+description: >
+  Detects attempts to extract the Active Directory database (NTDS.dit) via
+  ntdsutil's IFM snapshot feature or direct Volume Shadow Copy access.
+references:
+  - https://attack.mitre.org/techniques/T1003/003/
+author: Detection Engineering Team
+date: 2026/07/13
+tags:
+  - attack.credential-access
+  - attack.t1003.003
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_ntdsutil:
+    Image|endswith: '\ntdsutil.exe'
+    CommandLine|contains:
+      - 'create full'
+      - 'ifm'
+  selection_vss_copy:
+    CommandLine|contains|all:
+      - 'copy'
+      - 'HarddiskVolumeShadowCopy'
+      - 'ntds.dit'
+  condition: selection_ntdsutil or selection_vss_copy
+falsepositives:
+  - Legitimate AD backup/disaster-recovery procedures performed by domain admins
+level: critical

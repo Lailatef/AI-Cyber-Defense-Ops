@@ -1,0 +1,29 @@
+title: Active Directory Replication from Non-Machine Account (DCSync)
+id: 5d2e8b3a-9c1f-4e6d-a7b2-3f4c5d6e7a8b
+status: stable
+description: >
+  Detects directory replication requests (DS-Replication-Get-Changes /
+  DS-Replication-Get-Changes-All) performed by an account that is not a
+  domain controller machine account.
+references:
+  - https://attack.mitre.org/techniques/T1003/006/
+author: Detection Engineering Team
+date: 2026/07/13
+tags:
+  - attack.credential-access
+  - attack.t1003.006
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4662
+    Properties|contains:
+      - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+      - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'
+  filter_dc_accounts:
+    SubjectUserName|endswith: '$'
+  condition: selection and not filter_dc_accounts
+falsepositives:
+  - Legitimate third-party AD sync/backup tools with a registered service account
+level: critical

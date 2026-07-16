@@ -1,0 +1,45 @@
+case_id: INV-2026-002
+title: Kerberoasting Against Service Accounts via Compromised Build Server
+date: 2026/04/02
+status: closed
+disposition: true_positive
+severity: medium
+techniques:
+  - T1558.003
+hosts_involved:
+  - CI-BUILD01
+  - DC01
+triggering_alert: kerberoasting
+playbook_used: kerberos-ticket-attacks
+summary: >
+  The kerberoasting curated rule fired on DC01 for a burst of RC4-encrypted
+  TGS requests (Event ID 4769) against 14 distinct SPNs within 90 seconds,
+  originating from the account svc-cibuild. Well above the
+  kerberos_tgs_request_volume baseline (<10/hour) in
+  environment/baselines.yml, and svc-cibuild was not on the
+  expected_high_volume_accounts allowlist.
+timeline:
+  - time: "2026-04-02T02:03:00Z"
+    event: A dependency-confusion supply-chain package pulled by CI-BUILD01 executes a post-install script.
+  - time: "2026-04-02T02:05:00Z"
+    event: Script runs a SPN enumeration + TGS request tool under the context of svc-cibuild (a service account with excessive interactive-adjacent rights).
+  - time: "2026-04-02T02:06:00Z"
+    event: kerberoasting rule fires on DC01 for the request burst.
+  - time: "2026-04-02T02:15:00Z"
+    event: On-call analyst confirms svc-cibuild has no legitimate reason to enumerate SPNs outside of scheduled provisioning windows, escalates.
+  - time: "2026-04-02T02:40:00Z"
+    event: svc-cibuild password rotated to a 32-character random value; CI-BUILD01 taken offline for forensic review.
+root_cause: >
+  A malicious third-party build dependency executed under a service account
+  with weak (dictionary-crackable) password and broad SPN visibility.
+  Offline cracking of the captured TGS tickets was not confirmed to have
+  succeeded before containment.
+remediation:
+  - Rotated svc-cibuild and all other build-pipeline service account passwords to long random values.
+  - Migrated svc-cibuild to a Group Managed Service Account (gMSA) to remove offline-crackable password risk entirely.
+  - Added the dependency-confusion package to the blocklist and enabled package integrity verification in the CI pipeline.
+analyst: T. Okafor
+references:
+  - detection://rules/kerberoasting
+  - detection://playbooks/kerberos-ticket-attacks
+  - detection://environment/baselines
