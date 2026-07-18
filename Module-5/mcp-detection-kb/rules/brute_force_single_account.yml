@@ -1,18 +1,18 @@
-title: Potential Password Spraying via Failed Logons from a Single Source
-id: 9d3f2b1a-4e6c-4a8f-b1d3-6e2a5c8f1b90
+title: Potential Brute Force via Failed Logons Against a Single Account
+id: 1a7c4e2b-6f3d-4b8a-9e5c-2d7f1a3b6c4e
 status: test
 description: >
-  Detects a single source IP address generating failed logon attempts
-  (Event ID 4625) against more than 10 distinct accounts within a short
-  window, consistent with password-spraying attacks. Sibling rule
-  brute_force_single_account.yml covers the complementary case (many
-  failed attempts against a single account from multiple sources) — Sigma
-  only allows one aggregation function per condition, so the two
-  directions can't be combined with `or` in one rule.
+  Detects a single account receiving failed logon attempts (Event ID 4625)
+  from more than 10 distinct source IP addresses within a short window,
+  consistent with distributed brute-force attacks against one target
+  account. Sibling rule brute_force.yml covers the complementary case
+  (a single source spraying many accounts) — Sigma only allows one
+  aggregation function per condition, so the two directions can't be
+  combined with `or` in one rule.
 references:
   - https://attack.mitre.org/techniques/T1110/
 author: Detection Engineering Team
-date: 2026/07/13
+date: 2026/07/18
 tags:
   - attack.credential-access
   - attack.t1110
@@ -25,7 +25,7 @@ detection:
   filter_service_accounts:
     TargetUserName|endswith: '$'
   timeframe: 5m
-  condition: selection and not filter_service_accounts | count(TargetUserName) by IpAddress > 10
+  condition: selection and not filter_service_accounts | count(IpAddress) by TargetUserName > 10
 falsepositives:
   - Users mistyping their password repeatedly, especially with cached/mapped drive connections retrying an old credential
   - NAT/VPN gateways or proxies that aggregate many legitimate users behind a single source IP

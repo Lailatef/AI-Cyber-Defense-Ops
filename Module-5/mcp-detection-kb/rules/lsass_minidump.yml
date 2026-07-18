@@ -26,8 +26,9 @@ logsource:
 detection:
   selection_comsvcs:
     Image|endswith: '\rundll32.exe'
-    CommandLine|contains: 'comsvcs.dll'
-    CommandLine|contains: 'MiniDump'
+    CommandLine|contains|all:
+      - 'comsvcs.dll'
+      - 'MiniDump'
   selection_procdump:
     CommandLine|contains|all:
       - 'lsass'
@@ -46,3 +47,4 @@ falsepositives:
     lsass_access_processes) — if one is onboarded, add it as an explicit
     filter here rather than widening the selection logic
 level: critical
+# test-case: not yet validated against real EVTX — no MiniDump/comsvcs.dll or ProcDump-against-lsass sample exists in samples/ (the existing Mimikatz sample covers sekurlsa::logonpasswords, a different LSASS-access technique); condition confirmed to load and parse cleanly under Hayabusa -v but not confirmed to fire on true-positive telemetry
