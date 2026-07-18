@@ -1,0 +1,5 @@
+user input: C:\Users\white\OneDrive\Desktop\JHT-Projects\AI-Cyber-Defense-Ops\Module-5\mcp-detection-kb\hayabusa\hayabusa-3.10.0-win-x64.exe json-timeline -f ../../Module-5/mcp-detection-kb/samples/CA_DCSync_4662.evtx -o C:/Users/white/AppData/Local/Temp/claude/C--Users-white-OneDrive-Desktop-JHT-Projects-AI-Cyber-Defense-Ops-Module-6-siem-queries/afd52e99-b94c-4bb6-bd5b-990298c0dfbd/scratchpad/hayabusa_output3.jsonl -L -w -K -C -v -A -r ../../Module-5/mcp-detection-kb/rules/ -c ../../Module-5/mcp-detection-kb/hayabusa/rules/config
+[WARN] Failed to parse yml: ../../Module-5/mcp-detection-kb/rules/lsass_minidump.yml
+String("CommandLine|contains"): duplicated key in mapping at byte 1298 line 30 column 27 
+[WARN] Failed to parse rule file. (FilePath : ../../Module-5/mcp-detection-kb/rules/brute_force.yml)
+[WARN] There is no condition node under detection.
