@@ -1,0 +1,4 @@
+title: Test Rule
+description: Minimal placeholder test rule, valid per all three validate-rule.sh checks.
+tags:
+  - attack.t1234
