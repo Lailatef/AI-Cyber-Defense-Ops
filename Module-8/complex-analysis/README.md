@@ -78,6 +78,11 @@ rather than guessed — the same rule as Module 6's `/investigate`. Extending th
 mapping with cloud techniques is a documented follow-up.
 
 See `investigations/2026-07-19_multi-source-jrivera.md` for a completed example.
+It is fed by two per-source working notes —
+`investigations/2026-07-19_endpoint-jrivera.md` (Windows Security + Sysmon) and
+`investigations/2026-07-19_cloud-jrivera.md` (Azure AD sign-in + audit) — that
+each analyze one side in isolation before the correlated note stitches them
+together. All three cross-reference each other.
 
 ## Directory structure
 
@@ -87,7 +92,9 @@ logs/                                 # synthetic seeded sample logs (4 sources)
 templates/
   correlation-investigation-template.md
 investigations/
-  2026-07-19_multi-source-jrivera.md  # example output
+  2026-07-19_multi-source-jrivera.md  # example output (correlated note)
+  2026-07-19_endpoint-jrivera.md      #   per-source note: Windows Security + Sysmon
+  2026-07-19_cloud-jrivera.md         #   per-source note: Azure AD sign-in + audit
 analysis/                             # /ingest-ti output (threat-intel workflow)
 .claude/commands/
   investigate-multi.md                # multi-source investigation command
