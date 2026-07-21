@@ -87,6 +87,55 @@ Per-source working notes that feed this correlation:
 - [[T1071]] — Application Layer Protocol / C2 — evidence: event 8
 - [[T1003.006]] — OS Credential Dumping: DCSync (covered) — evidence: events 9, 10
 
+## Threat Context
+
+This intrusion's shape — a high-risk, impossible-travel sign-in (event 1) that
+succeeds *despite* MFA, immediately followed by the actor registering their own
+MFA method (event 2) — matches the current real-world **adversary-in-the-middle
+(AiTM)** pattern, where a reverse-proxy phishing kit relays the victim's
+credentials and captures the post-MFA session token, letting the attacker sign
+in as the user without re-satisfying MFA. Microsoft reported a **146% year-over-
+year rise in AiTM phishing attacks** (a **2024 measurement** — from the Digital
+Defense Report 2024 / the Nov 18, 2024 Microsoft Entra blog — that continues to
+be cited in later material, *not* a fresh 2026 figure), and
+**attacker-registered MFA methods** are a documented common follow-on TTP used
+to establish durable, self-owned access after the initial token theft. Our
+event 2 (`User registered security info`) is exactly that follow-on.
+
+> **Do not confuse** this AiTM stat with a separate, unrelated Microsoft
+> statistic — the **Q1 2026 QR-code phishing volume**, which *also* happens to
+> be ~146% but is a different metric (QR/quishing volume growth, not AiTM
+> phishing attacks). The number here refers specifically to the 2024 AiTM
+> measurement below.
+
+**Two additional ATT&CK techniques worth considering** for the initial-access
+mechanism, both arguably more precise than the current [[T1528]] mapping:
+
+- [[T1557]] — **Adversary-in-the-Middle.** Best fit for the reverse-proxy relay
+  that would explain a *successful* high-risk/impossible-travel sign-in past MFA
+  (event 1). Not directly evidenced in these four logs (an AiTM proxy sits
+  off-host), but it is the most likely upstream cause of the observed sign-in.
+- [[T1539]] — **Steal Web Session Cookie.** The specific artifact an AiTM proxy
+  captures — the authenticated session cookie/token — and the mechanism by which
+  event 1 succeeds without a fresh MFA challenge.
+
+The existing [[T1528]] (Steal Application Access Token) is a better fit for the
+**separate OAuth illicit-consent stage** at event 4 (`Consent to application`,
+mail-read grant to a third-party app) than for the cookie-theft at sign-in.
+Recommend keeping [[T1528]] scoped to event 4 and adding [[T1557]]/[[T1539]] as
+candidate techniques for event 1, noting they are inferred (off-host) rather than
+directly logged.
+
+**Sources:**
+- Microsoft Entra blog — "Defeating Adversary-in-the-Middle phishing attacks"
+  (Nov 18, 2024): https://techcommunity.microsoft.com/blog/microsoft-entra-blog/defeating-adversary-in-the-middle-phishing-attacks/1751777
+  — source of the 146% YoY AiTM figure (a 2024 measurement; also reflected in
+  the Microsoft Digital Defense Report 2024). Attacker MFA registration as
+  post-compromise persistence.
+- MITRE ATT&CK — [T1557](https://attack.mitre.org/techniques/T1557/),
+  [T1539](https://attack.mitre.org/techniques/T1539/),
+  [T1528](https://attack.mitre.org/techniques/T1528/)
+
 ## Detection Coverage
 
 Techniques checked against
