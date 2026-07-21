@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Events>
+  <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+      <Provider Name="Microsoft-Windows-Sysmon" Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" />
+      <EventID>1</EventID>
+      <Version>5</Version>
+      <Level>4</Level>
+      <Task>1</Task>
+      <Opcode>0</Opcode>
+      <Keywords>0x8000000000000000</Keywords>
+      <TimeCreated SystemTime="2026-07-19T14:18:22.6612030Z" />
+      <EventRecordID>77120</EventRecordID>
+      <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+      <Computer>WKSTN-07.insecurebank.local</Computer>
+      <Security UserID="S-1-5-18" />
+    </System>
+    <EventData>
+      <Data Name="RuleName">technique_id=T1003.001,technique_name=LSASS Memory</Data>
+      <Data Name="UtcTime">2026-07-19 14:18:22.655</Data>
+      <Data Name="ProcessGuid">{a1b2c3d4-1111-6675-0000-0010aabbccdd}</Data>
+      <Data Name="ProcessId">6284</Data>
+      <Data Name="Image">C:\Users\j.rivera\AppData\Local\Temp\svc-host.exe</Data>
+      <Data Name="OriginalFileName">mimikatz.exe</Data>
+      <Data Name="CommandLine">"C:\Users\j.rivera\AppData\Local\Temp\svc-host.exe" "sekurlsa::logonpasswords" exit</Data>
+      <Data Name="CurrentDirectory">C:\Users\j.rivera\AppData\Local\Temp\</Data>
+      <Data Name="User">INSECUREBANK\j.rivera</Data>
+      <Data Name="IntegrityLevel">High</Data>
+      <Data Name="Hashes">SHA256=A3E5D2C1B0F9A8E7D6C5B4A3928170F6E5D4C3B2A1908070605040302010FEDC</Data>
+      <Data Name="ParentProcessId">4012</Data>
+      <Data Name="ParentImage">C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe</Data>
+      <Data Name="ParentCommandLine">powershell.exe -nop -w hidden -enc SQBFAFgAKAB...</Data>
+    </EventData>
+  </Event>
+  <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+      <Provider Name="Microsoft-Windows-Sysmon" Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" />
+      <EventID>10</EventID>
+      <Version>3</Version>
+      <Level>4</Level>
+      <Task>10</Task>
+      <Opcode>0</Opcode>
+      <Keywords>0x8000000000000000</Keywords>
+      <TimeCreated SystemTime="2026-07-19T14:18:30.1180550Z" />
+      <EventRecordID>77121</EventRecordID>
+      <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+      <Computer>WKSTN-07.insecurebank.local</Computer>
+      <Security UserID="S-1-5-18" />
+    </System>
+    <EventData>
+      <Data Name="RuleName">technique_id=T1003.001,technique_name=LSASS Memory</Data>
+      <Data Name="UtcTime">2026-07-19 14:18:30.112</Data>
+      <Data Name="SourceProcessGUID">{a1b2c3d4-1111-6675-0000-0010aabbccdd}</Data>
+      <Data Name="SourceProcessId">6284</Data>
+      <Data Name="SourceImage">C:\Users\j.rivera\AppData\Local\Temp\svc-host.exe</Data>
+      <Data Name="TargetProcessGUID">{a1b2c3d4-2222-6650-0000-001000000000}</Data>
+      <Data Name="TargetProcessId">760</Data>
+      <Data Name="TargetImage">C:\Windows\System32\lsass.exe</Data>
+      <Data Name="GrantedAccess">0x1410</Data>
+      <Data Name="CallTrace">C:\Windows\SYSTEM32\ntdll.dll+9d234|C:\Windows\System32\KERNELBASE.dll+38f3e</Data>
+      <Data Name="User">INSECUREBANK\j.rivera</Data>
+    </EventData>
+  </Event>
+  <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+      <Provider Name="Microsoft-Windows-Sysmon" Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" />
+      <EventID>3</EventID>
+      <Version>5</Version>
+      <Level>4</Level>
+      <Task>3</Task>
+      <Opcode>0</Opcode>
+      <Keywords>0x8000000000000000</Keywords>
+      <TimeCreated SystemTime="2026-07-19T14:19:05.7742210Z" />
+      <EventRecordID>77135</EventRecordID>
+      <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+      <Computer>WKSTN-07.insecurebank.local</Computer>
+      <Security UserID="S-1-5-18" />
+    </System>
+    <EventData>
+      <Data Name="RuleName">-</Data>
+      <Data Name="UtcTime">2026-07-19 14:19:05.770</Data>
+      <Data Name="ProcessGuid">{a1b2c3d4-1111-6675-0000-0010aabbccdd}</Data>
+      <Data Name="ProcessId">6284</Data>
+      <Data Name="Image">C:\Users\j.rivera\AppData\Local\Temp\svc-host.exe</Data>
+      <Data Name="User">INSECUREBANK\j.rivera</Data>
+      <Data Name="Protocol">tcp</Data>
+      <Data Name="Initiated">true</Data>
+      <Data Name="SourceIp">10.20.7.41</Data>
+      <Data Name="SourceHostname">WKSTN-07.insecurebank.local</Data>
+      <Data Name="SourcePort">49875</Data>
+      <Data Name="DestinationIp">45.155.205.233</Data>
+      <Data Name="DestinationHostname">-</Data>
+      <Data Name="DestinationPort">443</Data>
+    </EventData>
+  </Event>
+  <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+      <Provider Name="Microsoft-Windows-Sysmon" Guid="{5770385f-c22a-43e0-bf4c-06f5698ffbd9}" />
+      <EventID>1</EventID>
+      <Version>5</Version>
+      <Level>4</Level>
+      <Task>1</Task>
+      <Opcode>0</Opcode>
+      <Keywords>0x8000000000000000</Keywords>
+      <TimeCreated SystemTime="2026-07-19T14:30:11.3320090Z" />
+      <EventRecordID>77188</EventRecordID>
+      <Channel>Microsoft-Windows-Sysmon/Operational</Channel>
+      <Computer>WKSTN-12.insecurebank.local</Computer>
+      <Security UserID="S-1-5-18" />
+    </System>
+    <EventData>
+      <Data Name="RuleName">-</Data>
+      <Data Name="UtcTime">2026-07-19 14:30:11.330</Data>
+      <Data Name="ProcessGuid">{99887766-5544-6675-0000-0010ffeeddcc}</Data>
+      <Data Name="ProcessId">8140</Data>
+      <Data Name="Image">C:\Program Files\Google\Chrome\Application\chrome.exe</Data>
+      <Data Name="OriginalFileName">chrome.exe</Data>
+      <Data Name="CommandLine">"C:\Program Files\Google\Chrome\Application\chrome.exe" --type=renderer</Data>
+      <Data Name="CurrentDirectory">C:\Users\a.chen\</Data>
+      <Data Name="User">INSECUREBANK\a.chen</Data>
+      <Data Name="IntegrityLevel">Medium</Data>
+      <Data Name="Hashes">SHA256=11223344556677889900AABBCCDDEEFF00112233445566778899AABBCCDDEEFF</Data>
+      <Data Name="ParentProcessId">7002</Data>
+      <Data Name="ParentImage">C:\Program Files\Google\Chrome\Application\chrome.exe</Data>
+      <Data Name="ParentCommandLine">"C:\Program Files\Google\Chrome\Application\chrome.exe"</Data>
+    </EventData>
+  </Event>
+</Events>

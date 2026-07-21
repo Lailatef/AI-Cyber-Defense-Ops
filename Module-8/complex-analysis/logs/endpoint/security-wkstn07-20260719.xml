@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Events>
+  <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+      <Provider Name="Microsoft-Windows-Security-Auditing" Guid="{54849625-5478-4994-a5ba-3e3b0328c30d}" />
+      <EventID>4624</EventID>
+      <Version>2</Version>
+      <Level>0</Level>
+      <Task>12544</Task>
+      <Opcode>0</Opcode>
+      <Keywords>0x8020000000000000</Keywords>
+      <TimeCreated SystemTime="2026-07-19T14:12:03.4471120Z" />
+      <EventRecordID>480122</EventRecordID>
+      <Channel>Security</Channel>
+      <Computer>WKSTN-07.insecurebank.local</Computer>
+      <Security />
+    </System>
+    <EventData>
+      <Data Name="SubjectUserSid">S-1-5-18</Data>
+      <Data Name="SubjectUserName">WKSTN-07$</Data>
+      <Data Name="SubjectDomainName">INSECUREBANK</Data>
+      <Data Name="TargetUserSid">S-1-5-21-1064588739-3110032377-2861725111-1607</Data>
+      <Data Name="TargetUserName">j.rivera</Data>
+      <Data Name="TargetDomainName">INSECUREBANK</Data>
+      <Data Name="LogonType">10</Data>
+      <Data Name="LogonProcessName">User32</Data>
+      <Data Name="AuthenticationPackageName">Negotiate</Data>
+      <Data Name="WorkstationName">WKSTN-07</Data>
+      <Data Name="IpAddress">45.155.205.233</Data>
+      <Data Name="IpPort">51234</Data>
+    </EventData>
+  </Event>
+</Events>

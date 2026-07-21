@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Events>
+  <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+      <Provider Name="Microsoft-Windows-Security-Auditing" Guid="{54849625-5478-4994-a5ba-3e3b0328c30d}" />
+      <EventID>4662</EventID>
+      <Version>0</Version>
+      <Level>0</Level>
+      <Task>12804</Task>
+      <Opcode>0</Opcode>
+      <Keywords>0x8020000000000000</Keywords>
+      <TimeCreated SystemTime="2026-07-19T14:20:41.9930410Z" />
+      <EventRecordID>993214</EventRecordID>
+      <Channel>Security</Channel>
+      <Computer>DC1.insecurebank.local</Computer>
+      <Security />
+    </System>
+    <EventData>
+      <Data Name="SubjectUserSid">S-1-5-21-1064588739-3110032377-2861725111-1607</Data>
+      <Data Name="SubjectUserName">j.rivera</Data>
+      <Data Name="SubjectDomainName">INSECUREBANK</Data>
+      <Data Name="SubjectLogonId">0x0000000004a3f81c</Data>
+      <Data Name="ObjectServer">DS</Data>
+      <Data Name="ObjectType">%{19195a5b-6da0-11d0-afd3-00c04fd930c9}</Data>
+      <Data Name="ObjectName">%{f0f8ffab-1191-11d0-a060-00aa006c33ed}</Data>
+      <Data Name="OperationType">Object Access</Data>
+      <Data Name="AccessMask">0x100</Data>
+      <Data Name="Properties">Control Access;{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2};{1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}</Data>
+    </EventData>
+  </Event>
+  <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+    <System>
+      <Provider Name="Microsoft-Windows-Security-Auditing" Guid="{54849625-5478-4994-a5ba-3e3b0328c30d}" />
+      <EventID>4662</EventID>
+      <Version>0</Version>
+      <Level>0</Level>
+      <Task>12804</Task>
+      <Opcode>0</Opcode>
+      <Keywords>0x8020000000000000</Keywords>
+      <TimeCreated SystemTime="2026-07-19T14:20:42.0148870Z" />
+      <EventRecordID>993215</EventRecordID>
+      <Channel>Security</Channel>
+      <Computer>DC1.insecurebank.local</Computer>
+      <Security />
+    </System>
+    <EventData>
+      <Data Name="SubjectUserSid">S-1-5-21-1064588739-3110032377-2861725111-1607</Data>
+      <Data Name="SubjectUserName">j.rivera</Data>
+      <Data Name="SubjectDomainName">INSECUREBANK</Data>
+      <Data Name="SubjectLogonId">0x0000000004a3f81c</Data>
+      <Data Name="ObjectServer">DS</Data>
+      <Data Name="ObjectType">%{19195a5b-6da0-11d0-afd3-00c04fd930c9}</Data>
+      <Data Name="ObjectName">%{f0f8ffab-1191-11d0-a060-00aa006c33ed}</Data>
+      <Data Name="OperationType">Object Access</Data>
+      <Data Name="AccessMask">0x100</Data>
+      <Data Name="Properties">Control Access;{1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}</Data>
+    </EventData>
+  </Event>
+</Events>
