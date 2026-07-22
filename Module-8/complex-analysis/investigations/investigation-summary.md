@@ -21,11 +21,11 @@ The attacker signed in from a foreign IP past MFA (impossible-travel, high-risk)
 
 | # | Time | Source | Event |
 |---|---|---|---|
-| — | 13:24 | AAD sign-in | Benign baseline sign-in, Trenton NJ US (`198.51.100.24`) — *pre-incident, excluded* |
-| 1 | 14:02 | AAD sign-in | High-risk **impossible-travel** sign-in from `45.155.205.233` (RO); MFA satisfied by token claim |
-| 2 | 14:05 | AAD audit | Attacker **registers new MFA method** (Microsoft Authenticator) — persistence |
-| 3 | 14:06 | AAD audit | Self-grants **Privileged Role Administrator** |
-| 4 | 14:08 | AAD audit | **OAuth consent** to mail-reading app (eM Client: Mail.Read, offline_access, IMAP) |
+| — | 13:24 | AAD sign-in | Benign baseline sign-in, Trenton NJ US (`198.51.100.24`) — *pre-incident, excluded* (`b1f0c2a4-0001`) |
+| 1 | 14:02 | AAD sign-in | High-risk **impossible-travel** sign-in from `45.155.205.233` (RO); MFA satisfied by token claim (`b1f0c2a4-0002`) |
+| 2 | 14:05 | AAD audit | Attacker **registers new MFA method** (Microsoft Authenticator) — persistence (`AAD-AUD-0001`) |
+| 3 | 14:06 | AAD audit | **Unconfirmed self-escalation** to **Privileged Role Administrator** — initiator and target are both `j.rivera` (possible log denormalization, worth verifying) (`AAD-AUD-0002`) |
+| 4 | 14:08 | AAD audit | **OAuth consent** to mail-reading app (eM Client: Mail.Read, offline_access, IMAP) (`AAD-AUD-0003`) |
 | 5 | 14:12 | Security 4624 | **Type-10 RDP logon** to `WKSTN-07` from the same `45.155.205.233` |
 | 6 | 14:18 | Sysmon 1 | Masqueraded `svc-host.exe` (real name `mimikatz.exe`) runs `sekurlsa::logonpasswords` |
 | 7 | 14:18 | Sysmon 10 | LSASS access (`GrantedAccess 0x1410`) — credential dump |
@@ -51,6 +51,32 @@ The attacker signed in from a foreign IP past MFA (impossible-travel, high-risk)
 
 **Candidate (inferred, off-host — for the initial-access mechanism):** T1557 (Adversary-in-the-Middle), T1539 (Steal Web Session Cookie). Not directly logged; consistent with the AiTM sign-in at event 1.
 
+## Detection Coverage
+
+Status against the curated mapping `../../Module-5/mcp-detection-kb/mappings/attack_techniques.json` (credential-access-focused). Absent techniques are reported as gaps, not guessed.
+
+| Technique | Status | Note |
+|---|---|---|
+| T1003.001 — LSASS | **covered** | in mapping (lsass_memory_access, lsass_minidump) |
+| T1003.006 — DCSync | **covered** | in mapping (dcsync) |
+| T1078.004 — Cloud Accounts | gap | cloud technique — not in mapping |
+| T1556.006 — MFA modification | gap | cloud technique — not in mapping |
+| T1098.003 — Additional Cloud Roles | gap | cloud technique — not in mapping |
+| T1528 — App Access Token / consent | gap | cloud technique — not in mapping |
+| T1021.001 — RDP | gap | on-prem lateral movement — not in mapping |
+| T1071 — C2 | gap | not in mapping |
+
+Two of eight confirmed techniques are covered; the six cloud/lateral-movement techniques are coverage gaps to close (see Recommendations).
+
+## Threat Context & Citations
+
+The event-1 sign-in — successful past MFA via a token claim, impossible-travel — plus the immediate attacker-registered MFA method (event 2) matches the documented **adversary-in-the-middle (AiTM)** pattern (reverse-proxy relay capturing the post-MFA session token). Microsoft reported a **146% year-over-year rise in AiTM phishing** — a **2024** measurement (Digital Defense Report 2024 / the Nov 18, 2024 Entra blog) still cited in later material, *not* fresh 2026 data.
+
+> **Do not confuse** this AiTM figure with a separate, unrelated Microsoft statistic — the **Q1 2026 QR-code / quishing phishing volume**, which also happens to be ~146% but measures a different thing.
+
+- Microsoft Entra blog, "Defeating Adversary-in-the-Middle phishing attacks" (Nov 18, 2024): https://techcommunity.microsoft.com/blog/microsoft-entra-blog/defeating-adversary-in-the-middle-phishing-attacks/1751777
+- MITRE ATT&CK: [T1557](https://attack.mitre.org/techniques/T1557/), [T1539](https://attack.mitre.org/techniques/T1539/), [T1528](https://attack.mitre.org/techniques/T1528/)
+
 ## Indicators of Compromise
 
 - **IP:** `45.155.205.233` (Bucharest, RO) — sign-in source, RDP source, and C2 destination.
@@ -61,10 +87,12 @@ The attacker signed in from a foreign IP past MFA (impossible-travel, high-risk)
 - **Privilege:** added to Privileged Role Administrator (role template `e8611ab8-c189-46e8-94e1-60213ab1f814`).
 - **Hosts:** `WKSTN-07.insecurebank.local` (`10.20.7.41`), `DC1.insecurebank.local`.
 
+**Evidentiary records (for citation):** AAD audit `AAD-AUD-0001` (MFA registration), `AAD-AUD-0002` (role grant), `AAD-AUD-0003` (OAuth consent); AAD sign-ins `b1f0c2a4-0001` (baseline), `b1f0c2a4-0002` (malicious). Endpoint events are Windows Security 4624/4662 and Sysmon 1/3/10 in `logs/endpoint/` (see the endpoint per-source note for exact records).
+
 ## Impact
 
 - **Domain compromise (assumed):** DCSync at 14:20 means all domain credential material should be treated as exposed — including `krbtgt`.
-- **Tenant compromise (potential):** Privileged Role Administrator can assign any role up to Global Administrator.
+- **Tenant compromise (potential):** Privileged Role Administrator can assign any role up to Global Administrator. *The grant itself is unconfirmed self-escalation (`AAD-AUD-0002`, initiator = target = `j.rivera`) — verify it is not log denormalization before reporting it as attacker action.*
 - **Ongoing mailbox exfiltration:** OAuth `offline_access` refresh token survives password reset and interactive-session revocation.
 - **Durable identity persistence:** attacker-registered MFA method survives a password reset.
 
